@@ -53,6 +53,22 @@ between = list(x = 1.2))
 
 ```
 
+## difference in mean fuel efficiency 2010 to 2011
+
+$H_0$: no difference between FE in 2010 and 2011
+$H_A$: there is a difference in FE for years 2010 and 2011
+
+We'll use a t-test for this inference:
+
+```{r}
+t.test(cars2010a$FE, cars2011a$FE)
+```
+Question #1:
+No evidence of any improvement/difference in mean FE between 2010 and 2011
+
+
+
+
 ### variables in the data set:
 
 ```{r}
