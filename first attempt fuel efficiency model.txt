@@ -1,7 +1,7 @@
 ---
 title: "Regression Problem"
 author: "Jaime Duran"
-date: "5/11/2020"
+date: "3/26/2020"
 output: html_document
 ---
 
@@ -13,7 +13,7 @@ The idea is this:  Fuel efficiency from 2010 and 2011 passenger cars and light t
 Questions:  
 1. Is there evidence of an improvement in fuel efficiency from 2010 to 2011?  
 2. What variables are most significant predictors of fuel efficienty?  
-3. Suggest ways in which fuel efficienty could be improved in future years. 
+3. Suggest ways in which fuel efficienty could be improved in future years.  drive type is significant use front wheel drive with only 2 wheels, and that CreeperGear should be left out. 
 
 
 ```{r setup, include=FALSE}
@@ -54,43 +54,24 @@ between = list(x = 1.2))
 
 ```
 
-## Q 1. Is there evidence of an improvement in fuel efficiency from 2010 to 2011?  
-## calculate difference in mean fuel efficiency 2010 to 2011
+## difference in mean fuel efficiency 2010 to 2011
 
 $H_0$: no difference between FE in 2010 and 2011  
 $H_A$: there is a difference in FE for years 2010 and 2011
 
-We can use a t-test for this inference:
+We'll use a t-test for this inference:
 
 ```{r}
 t.test(cars2010a$FE, cars2011a$FE)
 ```
-
-```{r}
-t.test(cars2010a$FE, cars2011a$FE)
-```
-
 ## Answer #1
-According to the t-test between the 2010 and 2011 dataset there was no significant improvement in the vehicle fuel efficiancy. The test estimates that cars in the sample data set from 2010 got 34.7 miles per gallon, compared to 34.73 MPG in 2011. The high p value means there is no evidence of MPG improvement between the two data sets. 
-
-
-## Question 2.  What variables are most significant predictors of fuel efficienty?  
-### variables in the data set:
-
-```{r}
-names(cars2010a)
-names (cars2012)
-```
-
-First a t test to see if there are significant changes in fuel efficiency values between data collected in 2010a and 2012. 
-
-The t-test below compares fuel efficiency data from 2010 to 2012, a time during which there were significant improvements in MPG and cars improved their MPG by an average of about 5 miles. Since p-value = 9.433e-06, I'm confident in the estmate produced by model. 
+Between 2010 and 2011 there was no significant improvement in the vehicle fuel efficiancy. The cars in the sample data set from 2010 got 34.7 miles per gallon, compared to 34.73 MPG in 2011.The P-value of 0.96 is greater than 0.05, from the t-test, which demonstrates how there was no significant changes between values in 2010a and 2011a.
+There was improvment between 2010 and 2012, and cars improved their MPG by an average of about 5 miles. In 2012 cars averaged 39.69 MPG. 
 
 ```{r}
 # t test looks at mean of the two data sets and see how likely it is that they fall in the same distribution. 
 t.test(cars2010a$FE, cars2012$FE)
-
-#two histograms on one plot using the par function
+#try to put two histograms on one plot using the par function
 par(mrow=2)
 hist(cars2010a$FE)
 hist(cars2012$FE)
@@ -98,8 +79,31 @@ hist(cars2012$FE)
 
 ```
 
-Since the histograms are hard to interpret definitively, begin to test how variables change relative to others in the rest of the data set. 
 
+### variables in the data set:
+
+```{r}
+names(cars2010a)
+```
+
+try transmissons = AV, AM6 and AM7
+
+```{r}
+testTranny = filter(cars2010a, Transmission %in% c('AV','AM7'))
+trannyModel = glm(FE ~ Transmission, data = testTranny)
+summary(trannyModel)
+
+print(mean(testTranny$FE))
+
+```
+
+Try adding air asperation method to see what it does..
+
+```{r}
+levels(cars2010a$ExhaustValvesPerCyl)
+trannyValveModel = glm(FE ~ Transmission + ExhaustValvesPerCyl, data = testTranny)
+summary(trannyValveModel)
+```
 
 ## ANOVA
 
@@ -119,8 +123,8 @@ anova(model1)
 
 ```
 
-It appears that TransCreeperGear is a drag, leave it out; also keep an eye on four wheel drive for MPG impact. 
-
+It appears that TransCreeperGear is a drag, leave it out;
+drive desc: front two wheel
 ```{r}
 pruned2010a = filter(cars2010a, TransCreeperGear==0 &  DriveDesc=='TwoWheelDriveFront' & EngDispl < 3)
 
@@ -134,13 +138,10 @@ anova(model2)
 ```
 
 ## Answer #2
-TransCreeper Gear was shown to have a negative impact on MPG, TransCreeperGear drags MPG by about -1.298510. Four Wheel Drive also negatively impacts fuel efficiency, by about-2.308553 -2.308553.
-
-Transmission type and Front Wheel Drive are significant predictors of improved fuel efficiency. 
+TransCreeper Gear was shown to have a negative impact on MPG. Transmission type and Front Wheel Drive are significant predictors of improved fuel efficiency. 
 
 
-## Question 3. Suggest ways in which fuel efficienty could be improved in future years.  
-## make a prediction for 2011
+make a prediction for 2011
 
 
 ```{r}
@@ -161,7 +162,6 @@ t.test(cars2011a$FE, pred2011)
 
 
 ##Answer 3
-Drive type is significant use front wheel drive with only 2 wheels, and TransCreeperGear should be left out to minimize drag on MPG. 
 
 Earlier in the exercise we found two variables which were not impacting MPG or dragging MPG down. The goal is to minimize engine displacement, and get better Fuel Efficiency. To study further which factors influence fuel efficiency I reran the ANOVA model,under the name "model2"" , with additional variables: 
 
